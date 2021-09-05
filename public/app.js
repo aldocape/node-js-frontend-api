@@ -13,13 +13,19 @@ const createUserForm = document.getElementById("createUserForm");
  * @param {*} name
  * @param {*} age
  */
-function addRow(name, age) {
+function addRow(name, age, id) {
   // Clono el template en una nueva variable
   const row = templateRow.cloneNode(true);
 
   // Modifico el valor del nodo de texto por el ingesado por el usuario
   row.querySelector(".txtName").innerText = name;
   row.querySelector(".txtAge").innerText = age;
+
+  row
+    .querySelector(".btnDelete")
+    .addEventListener("click", () => deleteUser(id));
+
+  row.querySelector(".row").dataset.id = id;
 
   // Inserto en el contenido de la tabla
   contentTable.appendChild(row);
@@ -56,7 +62,7 @@ async function api(method, endpoint, body = undefined) {
 async function loadTable() {
   contentTable.innerHTML = "";
   const data = await api("get", "/users");
-  data.forEach(({ name, age }) => addRow(name, age));
+  data.forEach(({ name, age, id }) => addRow(name, age, id));
 }
 
 /**
@@ -90,4 +96,14 @@ async function createUser() {
 
   createUserForm.reset();
   loadTable();
+}
+
+/**
+ * Eliminar usuario
+ */
+async function deleteUser(id) {
+  await api("delete", `/users/${id}`);
+
+  const userRow = document.querySelector(`[data-id='${id}']`);
+  userRow.remove();
 }
